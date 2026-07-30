@@ -1,12 +1,15 @@
 # app/product/router.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-
-# 프로젝트의 get_db 위치에 맞게 수정하세요.
-# from app.core.db import get_db
 from app.product.repository import ProductRepository
 from app.product.schemas import ProductMasterCreate, ProductMasterResponse
 from app.product.service import ProductService
+from app.core.db import get_db
+from app.clients.ai_service_client import get_ai_service__client
+from app.product.models import ProductMatchItem, ProductMatchResult
+from app.product.repository import ProductRepository
+from app.product.schemas import ProductMatchRequest, ProductMatchResponse
+from app.product.service import ProductMatchService
 
 router = APIRouter(tags=["Admin Product Master"])
 
