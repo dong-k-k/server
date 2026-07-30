@@ -1,0 +1,23 @@
+[
+  { "country_code": "US", "country_name": "미국", "risk_grade": "LOW", "score": 1 },
+  { "country_code": "DE", "country_name": "독일", "risk_grade": "LOW", "score": 1 },
+  { "country_code": "JP", "country_name": "일본", "risk_grade": "LOW", "score": 1 },
+  { "country_code": "SG", "country_name": "싱가포르", "risk_grade": "LOW", "score": 1 },
+  { "country_code": "AU", "country_name": "호주", "risk_grade": "LOW", "score": 1 },
+  { "country_code": "HK", "country_name": "홍콩", "risk_grade": "LOW", "score": 2 },
+  { "country_code": "TW", "country_name": "대만", "risk_grade": "LOW", "score": 2 },
+  { "country_code": "AE", "country_name": "아랍에미리트", "risk_grade": "LOW", "score": 2 },
+  { "country_code": "CN", "country_name": "중국", "risk_grade": "MEDIUM", "score": 3 },
+  { "country_code": "SA", "country_name": "사우디아라비아", "risk_grade": "MEDIUM", "score": 3 },
+  { "country_code": "MY", "country_name": "말레이시아", "risk_grade": "MEDIUM", "score": 3 },
+  { "country_code": "TH", "country_name": "태국", "risk_grade": "MEDIUM", "score": 3 },
+  { "country_code": "VN", "country_name": "베트남", "risk_grade": "MEDIUM", "score": 4 },
+  { "country_code": "IN", "country_name": "인도", "risk_grade": "MEDIUM", "score": 4 },
+  { "country_code": "ID", "country_name": "인도네시아", "risk_grade": "MEDIUM", "score": 4 },
+  { "country_code": "MX", "country_name": "멕시코", "risk_grade": "MEDIUM", "score": 4 },
+  { "country_code": "PH", "country_name": "필리핀", "risk_grade": "MEDIUM", "score": 4 },
+  { "country_code": "BR", "country_name": "브라질", "risk_grade": "MEDIUM", "score": 5 },
+  { "country_code": "TR", "country_name": "튀르키예", "risk_grade": "HIGH", "score": 6 },
+  { "country_code": "RU", "country_name": "러시아", "risk_grade": "HIGH", "score": 7 },
+  { "country_code": "AR", "country_name": "아르헨티나", "risk_grade": "HIGH", "score": 7 }
+]

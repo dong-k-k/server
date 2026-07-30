@@ -1,9 +1,8 @@
+"""add product master tables
 
-"""add country_risk table
-
-Revision ID: d22ffb66fc78
-Revises: afa9e202dbb1
-Create Date: 2026-07-31 08:35:01.879853
+Revision ID: 55a93184ea6d
+Revises: d22ffb66fc78
+Create Date: 2026-07-31 08:43:11.699457
 
 """
 from typing import Sequence, Union
@@ -13,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'd22ffb66fc78'
-down_revision: Union[str, Sequence[str], None] = 'afa9e202dbb1'
+revision: str = '55a93184ea6d'
+down_revision: Union[str, Sequence[str], None] = 'd22ffb66fc78'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
