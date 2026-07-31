@@ -49,3 +49,28 @@ class ProductEvaluationResult(BaseModel):
     product_name: str
     verdict: Verdict
     fit_score: int
+
+class ProductMatchItemResponse(BaseModel):
+    id: int
+    product_id: str
+    verdict: str
+    fit_score: int
+    reason_text: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ProductMatchRequest(BaseModel):
+    settlement_id: int
+    assessment_id: int
+    risk_profile_id: int
+
+
+class ProductMatchResponse(BaseModel):
+    match_id: int
+    settlement_id: int
+    assessment_id: int
+    risk_profile_id: int
+    items: list[ProductMatchItemResponse] = []
+
+    model_config = ConfigDict(from_attributes=True)
