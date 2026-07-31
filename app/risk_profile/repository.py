@@ -36,3 +36,8 @@ class RiskProfileRepository:
             select(RiskProfile).where(RiskProfile.settlement_id == settlement_id)
         )
         return result.scalars().first()
+
+    async def update(self, risk_profile: RiskProfile) -> RiskProfile:
+        await self.db.commit()
+        await self.db.refresh(risk_profile)
+        return risk_profile
