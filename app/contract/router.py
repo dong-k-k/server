@@ -37,6 +37,18 @@ async def get_contract(
     return contract
 
 
+@router.put("/{contract_id}", response_model=ContractResponse)
+async def update_contract(
+    contract_id: int,
+    req: ContractCreateRequest,
+    service: ContractService = Depends(get_contract_service),
+):
+    contract = await service.update_contract(contract_id, req)
+    if not contract:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contract not found")
+    return contract
+
+
 @router.post(
     "/{contract_id}/settlement-items",
     response_model=SettlementItemResponse,

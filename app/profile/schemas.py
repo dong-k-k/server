@@ -1,18 +1,26 @@
-from pydantic import BaseModel
+from decimal import Decimal
 
-class ProfileCreateRequest(BaseModel):
-    business_name: str
-    email: str | None = None
-    phone: str | None = None
-    business_type: str
-    annual_export_amount: float | None = None
-    annual_import_amount: float | None = None
-    annual_revenue: float | None = None
-    operating_profit: float | None = None
-    credit_grade: str | None = None
-    counterpart_countries: list[str] = []
+from pydantic import BaseModel, ConfigDict, Field
 
-class ProfileResponse(BaseModel):
+
+class ProfileUpsertRequest(BaseModel):
+    business_name: str = Field(min_length=1, max_length=100)
+    email: str | None = Field(default=None, max_length=100)
+    phone: str | None = Field(default=None, max_length=20)
+    business_type: str = Field(pattern="^(EXPORT|IMPORT|BOTH)$")
+    annual_export_amount: Decimal | None = None
+    annual_import_amount: Decimal | None = None
+    annual_revenue: Decimal | None = None
+    operating_profit: Decimal | None = None
+    credit_grade: str | None = Field(default=None, max_length=10)
+    counterpart_countries: list[str] = Field(default_factory=list)
+
+
+class ProfileCreateRequest(ProfileUpsertRequest):
+    pass
+
+
+class ProfileResponse(ProfileUpsertRequest):
     profile_id: int
-    business_type: str
-    counterpart_countries: list[str]
+
+    model_config = ConfigDict(from_attributes=True)

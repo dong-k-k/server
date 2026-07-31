@@ -1,4 +1,6 @@
+from datetime import datetime
 from typing import Optional
+from fastapi import HTTPException, status
 from app.consultation.models import (
     ConsultationRequest,
     ConsultationRequestProduct,
@@ -20,7 +22,19 @@ class ConsultationService:
         consultation_request = ConsultationRequest(
             profile_id=payload.profile_id,
             recommendation_id=payload.recommendation_id,
+            contact_name=payload.contact_name,
+            contact_phone=payload.contact_phone,
+            contact_email=payload.contact_email,
+            consultation_method=payload.consultation_method,
+            preferred_time=payload.preferred_time,
+            preferred_branch=payload.preferred_branch,
+            memo=payload.memo,
+            consented_at=datetime.utcnow(),
+            policy_version=payload.policy_version,
         )
+
+        if not payload.privacy_consent:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Privacy consent is required")
 
         for product_id in payload.selected_product_ids:
             request_product = ConsultationRequestProduct(product_id=product_id)

@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from app.consultation.router import router as consultation_router
 from app.contract.router import router as contract_router
+from app.country_risk.router import router as country_router
 from app.product.router import router as product_router
 from app.profile.router import router as profile_router
 from app.risk.router import router as risk_router
@@ -17,6 +18,7 @@ app.include_router(risk_profile_router)
 app.include_router(product_router)
 app.include_router(strategy_router)
 app.include_router(consultation_router)
+app.include_router(country_router)
 
 
 @app.get("/health", tags=["health"])

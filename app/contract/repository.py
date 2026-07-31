@@ -32,3 +32,8 @@ class ContractRepository:
             select(SettlementItem).where(SettlementItem.settlement_id == settlement_id)
         )
         return result.scalar_one_or_none()
+
+    async def update(self, contract: Contract) -> Contract:
+        await self.db.commit()
+        await self.db.refresh(contract)
+        return contract

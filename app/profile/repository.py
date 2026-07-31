@@ -20,3 +20,8 @@ class ProfileRepository:
             .where(CompanyProfile.profile_id == profile_id)
         )
         return result.scalar_one_or_none()
+
+    async def update(self, profile: CompanyProfile) -> CompanyProfile:
+        await self.db.commit()
+        await self.db.refresh(profile)
+        return profile

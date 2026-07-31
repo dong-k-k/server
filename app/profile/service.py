@@ -1,6 +1,6 @@
 from app.profile.models import CompanyProfile, CounterpartCountry
 from app.profile.repository import ProfileRepository
-from app.profile.schemas import ProfileCreateRequest
+from app.profile.schemas import ProfileCreateRequest, ProfileUpsertRequest
 
 class ProfileService:
     def __init__(self, repo: ProfileRepository):
@@ -18,3 +18,18 @@ class ProfileService:
         )
         profile.countries = [CounterpartCountry(country_code=c) for c in req.counterpart_countries]
         return await self.repo.save(profile)
+
+    async def get_profile(self, profile_id: int) -> CompanyProfile | None:
+      return await self.repo.find_by_id(profile_id)
+    
+    async def update_profile(self, profile_id: int, req: ProfileUpsertRequest) -> CompanyProfile | None:
+        profile = await self.repo.find_by_id(profile_id)
+        if not profile:
+            return None
+        for field in (
+            "business_name", "email", "phone", "business_type", "annual_export_amount",
+            "annual_import_amount", "annual_revenue", "operating_profit", "credit_grade",
+        ):
+            setattr(profile, field, getattr(req, field))
+        profile.countries = [CounterpartCountry(country_code=country) for country in req.counterpart_countries]
+        return await self.repo.update(profile)

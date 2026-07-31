@@ -31,6 +31,28 @@ class ContractService:
     async def get_contract(self, contract_id: int) -> Contract | None:
         return await self.repo.find_by_id(contract_id)
 
+    async def update_contract(self, contract_id: int, req: ContractCreateRequest) -> Contract | None:
+        contract = await self.repo.find_by_id(contract_id)
+        if not contract:
+            return None
+        contract.profile_id = req.profile_id
+        contract.contract_type = req.contract_type
+        contract.payment_term = req.payment_term
+        contract.advance_settled_amount = req.advance_settled_amount
+        contract.netting_offset_amount = req.netting_offset_amount
+        contract.settlement_items = [
+            SettlementItem(
+                amount=item.amount,
+                currency=item.currency,
+                price_fix_date=item.price_fix_date,
+                settlement_date=item.settlement_date,
+                is_payment_adjustable=item.is_payment_adjustable,
+                bep_rate=item.bep_rate,
+            )
+            for item in req.settlement_items
+        ]
+        return await self.repo.update(contract)
+
     async def add_settlement_item_to_contract(
         self, contract_id: int, req: SettlementItemCreate
     ) -> SettlementItem | None:
