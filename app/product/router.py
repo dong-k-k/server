@@ -81,3 +81,11 @@ async def create_product_match(
         items=[ProductMatchItem(**item) for item in items],
     )
     return await product_repo.save_match_result(match)
+
+
+@router.get("/api/v1/product-matches/{match_id}", response_model=ProductMatchResponse)
+async def get_product_match(match_id: int, db: AsyncSession = Depends(get_db)):
+    match = await ProductRepository(db).find_match_result_by_id(match_id)
+    if not match:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product match not found")
+    return match
