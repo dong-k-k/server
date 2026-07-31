@@ -1,4 +1,3 @@
-# app/strategy/schemas.py
 from typing import Any, Optional
 from pydantic import BaseModel, ConfigDict
 
