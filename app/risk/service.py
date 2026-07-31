@@ -11,6 +11,8 @@ class RiskAssessmentService:
 
     async def assess(self, settlement_id: int) -> FxRiskAssessment:
         settlement = await self.contract_repo.find_settlement_by_id(settlement_id)
+        if not settlement:
+            return None
         payload = {
             "amount": float(settlement.amount), "currency": settlement.currency,
             "priceFixDate": str(settlement.price_fix_date), "settlementDate": str(settlement.settlement_date),

@@ -1,3 +1,6 @@
+from app.strategy.models import StrategyRecommendation
+
+
 class StrategyService:
     def __init__(self, repo, ai_client):
         self.repo = repo

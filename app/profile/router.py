@@ -7,7 +7,7 @@ from app.profile.schemas import ProfileCreateRequest, ProfileResponse
 from app.profile.service import ProfileService
 
 from app.product.repository import ProductRepository
-from app.risk.repository import RiskAssessmentRepository
+from app.risk.repository import RiskRepository
 from app.strategy.repository import StrategyRepository
 
 router = APIRouter(prefix="/api/v1/profiles", tags=["profile"])
@@ -60,7 +60,7 @@ async def get_summary(
         )
 
     # 각 도메인 repository 객체 생성
-    risk_repo = RiskAssessmentRepository(db)
+    risk_repo = RiskRepository(db)
     product_repo = ProductRepository(db)
     strategy_repo = StrategyRepository(db)
 

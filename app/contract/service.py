@@ -1,47 +1,51 @@
 from app.contract.models import Contract, SettlementItem
 from app.contract.repository import ContractRepository
-from app.contract.schemas import ContractCreateRequest, SettlementItemCreateRequest
+from app.contract.schemas import ContractCreateRequest, SettlementItemCreate
+
 
 class ContractService:
     def __init__(self, repo: ContractRepository):
         self.repo = repo
 
     async def create_contract(self, req: ContractCreateRequest) -> Contract:
-        # 1. 계약 기본 정보 생성
         contract = Contract(
             profile_id=req.profile_id,
-            title=req.title,
-            total_amount=req.total_amount,
-            currency=req.currency,
+            contract_type=req.contract_type,
+            payment_term=req.payment_term,
+            advance_settled_amount=req.advance_settled_amount,
+            netting_offset_amount=req.netting_offset_amount,
         )
-        # 2. settlement_items 리스트를 순회하며 SettlementItem 객체 생성 후 채우기
-        if req.settlement_items:
-            contract.settlement_items = [
-                SettlementItem(
-                    amount=item.amount,
-                    due_date=item.due_date,
-                    item_type=item.item_type
-                )
-                for item in req.settlement_items
-            ]
-        
+        contract.settlement_items = [
+            SettlementItem(
+                amount=item.amount,
+                currency=item.currency,
+                price_fix_date=item.price_fix_date,
+                settlement_date=item.settlement_date,
+                is_payment_adjustable=item.is_payment_adjustable,
+                bep_rate=item.bep_rate,
+            )
+            for item in req.settlement_items
+        ]
         return await self.repo.save(contract)
 
     async def get_contract(self, contract_id: int) -> Contract | None:
         return await self.repo.find_by_id(contract_id)
 
-    # 추가 엔드포인트용 로직: 기존 계약에 정산 항목 단독 추가
     async def add_settlement_item_to_contract(
-        self, contract_id: int, req: SettlementItemCreateRequest
+        self, contract_id: int, req: SettlementItemCreate
     ) -> SettlementItem | None:
         contract = await self.repo.find_by_id(contract_id)
         if not contract:
             return None
-        
-        item = SettlementItem(
-            contract_id=contract_id,
-            amount=req.amount,
-            due_date=req.due_date,
-            item_type=req.item_type
+
+        return await self.repo.add_settlement_item(
+            SettlementItem(
+                contract_id=contract_id,
+                amount=req.amount,
+                currency=req.currency,
+                price_fix_date=req.price_fix_date,
+                settlement_date=req.settlement_date,
+                is_payment_adjustable=req.is_payment_adjustable,
+                bep_rate=req.bep_rate,
+            )
         )
-        return await self.repo.add_settlement_item(item)

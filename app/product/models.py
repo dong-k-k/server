@@ -24,3 +24,25 @@ class EligibilityRule(Base):
     value: Mapped[dict] = mapped_column(JSON)
 
     product: Mapped["ProductMaster"] = relationship(back_populates="rules")
+
+
+class ProductMatchResult(Base):
+    __tablename__ = "product_match_result"
+    match_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    settlement_id: Mapped[int] = mapped_column(ForeignKey("settlement_item.settlement_id"))
+    assessment_id: Mapped[int] = mapped_column(ForeignKey("fx_risk_assessment.assessment_id"))
+    risk_profile_id: Mapped[int] = mapped_column(ForeignKey("risk_profiles.id"))
+    items: Mapped[list["ProductMatchItem"]] = relationship(
+        back_populates="match_result", cascade="all, delete-orphan"
+    )
+
+
+class ProductMatchItem(Base):
+    __tablename__ = "product_match_item"
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    match_id: Mapped[int] = mapped_column(ForeignKey("product_match_result.match_id"))
+    product_id: Mapped[str] = mapped_column(ForeignKey("product_master.product_id"))
+    verdict: Mapped[str] = mapped_column(String(20))
+    fit_score: Mapped[int] = mapped_column()
+    reason_text: Mapped[str | None] = mapped_column(String(500))
+    match_result: Mapped["ProductMatchResult"] = relationship(back_populates="items")

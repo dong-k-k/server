@@ -26,3 +26,9 @@ class ContractRepository:
         await self.db.commit()
         await self.db.refresh(item)
         return item
+
+    async def find_settlement_by_id(self, settlement_id: int) -> SettlementItem | None:
+        result = await self.db.execute(
+            select(SettlementItem).where(SettlementItem.settlement_id == settlement_id)
+        )
+        return result.scalar_one_or_none()
