@@ -1,27 +1,44 @@
-# repository.py
-from typing import Optional
-from sqlalchemy.orm import Session
-# from models import RiskAssessment  # 실제 정의한 DB Model 객체 import
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
-class RiskAssessmentRepository:
-    def __init__(self, db: Session):
+from app.contract.models import Contract, SettlementItem
+from app.risk.models import FxRiskAssessment
+
+
+class RiskRepository:
+    def __init__(self, db: AsyncSession):
         self.db = db
 
-    def save(self, risk_assessment) -> "RiskAssessment":
-        """
-        위험도 평가 엔티티를 DB에 저장 (또는 업데이트)
-        """
-        self.db.add(risk_assessment)
-        self.db.commit()
-        self.db.refresh(risk_assessment)
-        return risk_assessment
+    async def save(self, assessment: FxRiskAssessment) -> FxRiskAssessment:
+        self.db.add(assessment)
+        await self.db.commit()
+        await self.db.refresh(assessment)
+        return assessment
 
-    def find_by_id(self, assessment_id: str) -> Optional["RiskAssessment"]:
-        """
-        Risk Assessment ID로 단건 조회
-        """
-        return (
-            self.db.query(RiskAssessment)
-            .filter(RiskAssessment.id == assessment_id)
-            .first()
+    async def find_by_id(self, assessment_id: int) -> FxRiskAssessment | None:
+        result = await self.db.execute(
+            select(FxRiskAssessment)
+            .options(selectinload(FxRiskAssessment.scenarios))
+            .where(FxRiskAssessment.assessment_id == assessment_id)
         )
+        return result.scalar_one_or_none()
+
+    async def find_by_settlement_id(self, settlement_id: int) -> FxRiskAssessment | None:
+        result = await self.db.execute(
+            select(FxRiskAssessment)
+            .options(selectinload(FxRiskAssessment.scenarios))
+            .where(FxRiskAssessment.settlement_id == settlement_id)
+            .order_by(FxRiskAssessment.created_at.desc())
+        )
+        return result.scalars().first()
+
+    async def find_latest_by_profile(self, profile_id: int) -> FxRiskAssessment | None:
+        result = await self.db.execute(
+            select(FxRiskAssessment)
+            .join(SettlementItem, FxRiskAssessment.settlement_id == SettlementItem.settlement_id)
+            .join(Contract, SettlementItem.contract_id == Contract.contract_id)
+            .where(Contract.profile_id == profile_id)
+            .order_by(FxRiskAssessment.created_at.desc())
+        )
+        return result.scalars().first()

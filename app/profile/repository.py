@@ -15,6 +15,8 @@ class ProfileRepository:
 
     async def find_by_id(self, profile_id: int) -> CompanyProfile | None:
         result = await self.db.execute(
-            select(CompanyProfile).where(CompanyProfile.profile_id == profile_id)
+            select(CompanyProfile)
+            .options(selectinload(CompanyProfile.countries))
+            .where(CompanyProfile.profile_id == profile_id)
         )
         return result.scalar_one_or_none()
