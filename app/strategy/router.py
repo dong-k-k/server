@@ -1,6 +1,7 @@
 from app.risk.repository import RiskRepository
 from app.risk_profile.repository import RiskProfileRepository
 from app.product.repository import ProductRepository
+from fastapi.responses import Response
 
 @router.post(
     "/api/v1/strategy-recommendations",
@@ -28,3 +29,9 @@ async def create_strategy_recommendation(
         risk_profile=risk_profile,
         candidates=match_result.items,
     )
+
+@router.get("/{recommendation_id}/report")
+async def download_report(recommendation_id: int, db=Depends(get_db)):
+    # repo로 recommendation·assessment·match_items 조회 후
+    pdf_bytes = await render_report_pdf(assessment, match_items, recommendation)
+    return Response(content=pdf_bytes, media_type="application/pdf")
