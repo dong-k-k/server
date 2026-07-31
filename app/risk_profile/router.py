@@ -1,9 +1,7 @@
 # app/risk_profile/router.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-
-# 프로젝트 구조에 맞게 import 경로를 조정하세요.
-# from app.database import get_db
+from app.core.db import get_db
 from app.risk_profile.repository import RiskProfileRepository
 from app.risk_profile.schemas import RiskProfileCreate, RiskProfileResponse
 from app.risk_profile.service import RiskProfileService

@@ -1,0 +1,12 @@
+[
+  {
+    "product_id": "KSURE-FX-001", "name": "K-SURE 환변동보험(일반형)",
+    "provider": "KSURE", "direction": "수출", "strategy_group": "FX_HEDGING",
+    "rules": [{"field": "annual_export_amount", "operator": "LTE", "value": {"value": 5000000}}]
+  },
+  {
+    "product_id": "KB-FWD-001", "name": "KB 선물환 거래",
+    "provider": "KB", "direction": "수출", "strategy_group": "FX_HEDGING",
+    "rules": []
+  }
+]
