@@ -36,3 +36,11 @@ async def get_risk_assessment(assessment_id: int, db: AsyncSession = Depends(get
     if not assessment:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Risk assessment not found")
     return assessment
+
+
+@router.get("/settlement-items/{settlement_id}/risk-assessment", response_model=RiskAssessmentResponse)
+async def get_latest_risk_assessment(settlement_id: int, db: AsyncSession = Depends(get_db)):
+    assessment = await RiskRepository(db).find_by_settlement_id(settlement_id)
+    if not assessment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Risk assessment not found")
+    return assessment

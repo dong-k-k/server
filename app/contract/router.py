@@ -37,6 +37,11 @@ async def get_contract(
     return contract
 
 
+@router.get("", response_model=list[ContractResponse])
+async def list_contracts(profile_id: int, service: ContractService = Depends(get_contract_service)):
+    return await service.get_contracts_by_profile(profile_id)
+
+
 @router.put("/{contract_id}", response_model=ContractResponse)
 async def update_contract(
     contract_id: int,

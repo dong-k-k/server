@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.core.config import settings
 
 from app.consultation.router import router as consultation_router
 from app.contract.router import router as contract_router
@@ -10,6 +12,13 @@ from app.risk_profile.router import router as risk_profile_router
 from app.strategy.router import router as strategy_router
 
 app = FastAPI(title="FX Mate Backend", version="0.1.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[origin.strip() for origin in settings.cors_origins.split(",") if origin.strip()],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allow_headers=["Authorization", "Content-Type", "Idempotency-Key"],
+)
 
 app.include_router(profile_router)
 app.include_router(contract_router)

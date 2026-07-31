@@ -33,6 +33,15 @@ class ContractRepository:
         )
         return result.scalar_one_or_none()
 
+    async def find_by_profile_id(self, profile_id: int) -> list[Contract]:
+        result = await self.db.execute(
+            select(Contract)
+            .options(selectinload(Contract.settlement_items))
+            .where(Contract.profile_id == profile_id)
+            .order_by(Contract.created_at.desc())
+        )
+        return list(result.scalars().all())
+
     async def update(self, contract: Contract) -> Contract:
         await self.db.commit()
         await self.db.refresh(contract)

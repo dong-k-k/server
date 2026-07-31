@@ -51,6 +51,14 @@ async def get_product(
     return product
 
 
+@router.get("/api/v1/products", response_model=list[ProductMasterResponse])
+async def list_products(
+    strategy_group: str | None = None,
+    db: AsyncSession = Depends(get_db),
+):
+    return await ProductRepository(db).find_all_by_strategy_group(strategy_group)
+
+
 @router.post(
     "/api/v1/product-matches",
     response_model=ProductMatchResponse,
