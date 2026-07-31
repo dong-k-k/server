@@ -40,6 +40,14 @@ async def create_strategy_recommendation(
     )
 
 
+@router.get("/{recommendation_id}", response_model=StrategyRecommendationResponse)
+async def get_strategy_recommendation(recommendation_id: int, db: AsyncSession = Depends(get_db)):
+    recommendation = await StrategyRepository(db).find_by_id(recommendation_id)
+    if not recommendation:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Recommendation not found")
+    return recommendation
+
+
 @router.get("/{recommendation_id}/report")
 async def download_report(recommendation_id: int, db: AsyncSession = Depends(get_db)):
     recommendation = await StrategyRepository(db).find_by_id(recommendation_id)

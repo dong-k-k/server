@@ -41,3 +41,7 @@ class ConsultationRequestResponse(BaseModel):
     requested_at: datetime
     selected_products: list[ConsultationRequestProductResponse] = Field(default_factory=list)
     model_config = ConfigDict(from_attributes=True)
+
+
+class ConsultationStatusUpdate(BaseModel):
+    status: str = Field(pattern="^(REQUESTED|MATCHING|ASSIGNED|COMPLETED|CANCELLED)$")

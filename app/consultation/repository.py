@@ -32,3 +32,8 @@ class ConsultationRepository:
         )
         result = await self.db.execute(stmt)
         return result.scalars().first()
+
+    async def update(self, consultation_request: ConsultationRequest) -> ConsultationRequest:
+        await self.db.commit()
+        await self.db.refresh(consultation_request)
+        return consultation_request

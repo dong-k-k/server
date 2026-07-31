@@ -5,6 +5,7 @@ from app.consultation.repository import ConsultationRepository
 from app.consultation.schemas import (
     ConsultationRequestCreate,
     ConsultationRequestResponse,
+    ConsultationStatusUpdate,
 )
 from app.consultation.service import ConsultationService
 
@@ -47,4 +48,19 @@ async def get_consultation_request(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Consultation request with ID {id} not found",
         )
+    return consultation
+
+
+@router.patch(
+    "/api/v1/consultation-requests/{id}/status",
+    response_model=ConsultationRequestResponse,
+)
+async def update_consultation_status(
+    id: int,
+    payload: ConsultationStatusUpdate,
+    service: ConsultationService = Depends(get_consultation_service),
+):
+    consultation = await service.update_status(id, payload.status)
+    if not consultation:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Consultation request not found")
     return consultation
