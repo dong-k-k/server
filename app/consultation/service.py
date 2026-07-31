@@ -47,3 +47,10 @@ class ConsultationService:
         상담 신청 내역 단건 조회
         """
         return await self.repo.find_by_id(request_id)
+
+    async def update_status(self, request_id: int, status_value: str) -> Optional[ConsultationRequest]:
+        consultation_request = await self.repo.find_by_id(request_id)
+        if not consultation_request:
+            return None
+        consultation_request.status = status_value
+        return await self.repo.update(consultation_request)
