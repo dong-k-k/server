@@ -31,6 +31,9 @@ class ContractService:
     async def get_contract(self, contract_id: int) -> Contract | None:
         return await self.repo.find_by_id(contract_id)
 
+    async def get_contracts_by_profile(self, profile_id: int) -> list[Contract]:
+        return await self.repo.find_by_profile_id(profile_id)
+
     async def update_contract(self, contract_id: int, req: ContractCreateRequest) -> Contract | None:
         contract = await self.repo.find_by_id(contract_id)
         if not contract:

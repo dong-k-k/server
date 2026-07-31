@@ -89,6 +89,13 @@ class ProductRepository:
         )
         return list(result.scalars().all())
 
+    async def find_all_by_strategy_group(self, strategy_group: str | None) -> list[ProductMaster]:
+        stmt = select(ProductMaster).options(selectinload(ProductMaster.rules))
+        if strategy_group:
+            stmt = stmt.where(ProductMaster.strategy_group == strategy_group)
+        result = await self.db.execute(stmt.order_by(ProductMaster.name))
+        return list(result.scalars().all())
+
     async def save_match_result(self, match_result: ProductMatchResult) -> ProductMatchResult:
         """
         상품 매칭 결과 및 매칭 아이템 목록 DB 저장
