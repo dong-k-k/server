@@ -5,6 +5,7 @@ from app.product.rule_engine import Verdict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
+from app.contract.models import Contract, SettlementItem
 from app.product.models import ProductMaster, ProductMatchResult
 
 class EligibilityRuleCreate(BaseModel):
@@ -69,6 +70,25 @@ class ProductRepository:
         result = await self.db.execute(stmt)
         return list(result.scalars().all())
 
+    async def save(self, product: ProductMaster) -> ProductMaster:
+        self.db.add(product)
+        await self.db.commit()
+        await self.db.refresh(product)
+        return product
+
+    async def find_by_id(self, product_id: str) -> Optional[ProductMaster]:
+        stmt = select(ProductMaster).options(selectinload(ProductMaster.rules)).where(
+            ProductMaster.product_id == product_id
+        )
+        result = await self.db.execute(stmt)
+        return result.scalars().first()
+
+    async def find_all(self) -> list[ProductMaster]:
+        result = await self.db.execute(
+            select(ProductMaster).options(selectinload(ProductMaster.rules))
+        )
+        return list(result.scalars().all())
+
     async def save_match_result(self, match_result: ProductMatchResult) -> ProductMatchResult:
         """
         상품 매칭 결과 및 매칭 아이템 목록 DB 저장
@@ -86,6 +106,17 @@ class ProductRepository:
             select(ProductMatchResult)
             .options(selectinload(ProductMatchResult.items))
             .where(ProductMatchResult.match_id == match_id)
+        )
+        result = await self.db.execute(stmt)
+        return result.scalars().first()
+
+    async def find_latest_match_by_profile(self, profile_id: int) -> Optional[ProductMatchResult]:
+        stmt = (
+            select(ProductMatchResult)
+            .join(SettlementItem, ProductMatchResult.settlement_id == SettlementItem.settlement_id)
+            .join(Contract, SettlementItem.contract_id == Contract.contract_id)
+            .where(Contract.profile_id == profile_id)
+            .order_by(ProductMatchResult.match_id.desc())
         )
         result = await self.db.execute(stmt)
         return result.scalars().first()

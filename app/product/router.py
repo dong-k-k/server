@@ -2,14 +2,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.product.repository import ProductRepository
-from app.product.schemas import ProductMasterCreate, ProductMasterResponse
-from app.product.service import ProductService
+from app.product.schemas import ProductMasterCreate, ProductMasterResponse, ProductMatchRequest, ProductMatchResponse
+from app.product.service import ProductService, ProductMatchService
 from app.core.db import get_db
-from app.clients.ai_service_client import get_ai_service__client
+from app.clients.ai_service_client import get_ai_client
+from app.contract.repository import ContractRepository
 from app.product.models import ProductMatchItem, ProductMatchResult
-from app.product.repository import ProductRepository
-from app.product.schemas import ProductMatchRequest, ProductMatchResponse
-from app.product.service import ProductMatchService
+from app.risk.repository import RiskRepository
+from app.risk_profile.repository import RiskProfileRepository
 
 router = APIRouter(tags=["Admin Product Master"])
 
@@ -49,3 +49,35 @@ async def get_product(
             detail=f"Product with ID {id} not found",
         )
     return product
+
+
+@router.post(
+    "/api/v1/product-matches",
+    response_model=ProductMatchResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_product_match(
+    payload: ProductMatchRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    contract_repo = ContractRepository(db)
+    settlement = await contract_repo.find_settlement_by_id(payload.settlement_id)
+    assessment = await RiskRepository(db).find_by_id(payload.assessment_id)
+    risk_profile = await RiskProfileRepository(db).find_by_id(payload.risk_profile_id)
+    if not (settlement and assessment and risk_profile):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Required matching data not found")
+
+    contract = await contract_repo.find_by_id(settlement.contract_id)
+    if not contract:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Contract not found")
+
+    product_repo = ProductRepository(db)
+    matcher = ProductMatchService(product_repo, get_ai_client())
+    items = await matcher.match(settlement, contract, assessment, risk_profile)
+    match = ProductMatchResult(
+        settlement_id=payload.settlement_id,
+        assessment_id=payload.assessment_id,
+        risk_profile_id=payload.risk_profile_id,
+        items=[ProductMatchItem(**item) for item in items],
+    )
+    return await product_repo.save_match_result(match)
