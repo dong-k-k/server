@@ -13,7 +13,9 @@ class Contract(Base):
     netting_offset_amount: Mapped[float | None] = mapped_column(Numeric(18, 2))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    settlement_items: Mapped[list["SettlementItem"]] = relationship(back_populates="contract")
+    settlement_items: Mapped[list["SettlementItem"]] = relationship(
+        back_populates="contract", cascade="all, delete-orphan"
+    )
 
 
 class SettlementItem(Base):
