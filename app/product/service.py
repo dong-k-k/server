@@ -111,7 +111,7 @@ class ProductMatchService:
                     "productId": product.product_id, "verdict": verdict.value,
                 })
                 items.append({
-                    "product_id": product.product_id, "strategy_group": group,
+                    "product_id": product.product_id,
                     "verdict": verdict.value, "fit_score": fit_score,
                     "reason_text": reason["reasonText"],
                 })
