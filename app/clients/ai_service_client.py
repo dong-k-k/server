@@ -1,3 +1,6 @@
+import random
+from datetime import date, timedelta
+
 import httpx
 from app.core.config import settings
 
@@ -52,5 +55,25 @@ class AIServiceClient:
             resp.raise_for_status()
             return resp.json()
 
+    async def get_rate_history(self, currency: str, days: int = 180) -> dict:
+        if self.mock_mode:
+            today = date.today()
+            rate = 1350.0
+            series = []
+            for i in range(days, -1, -1):
+                rate += random.uniform(-6, 6)
+                series.append({"date": str(today - timedelta(days=i)), "rate": round(rate, 2)})
+            return {
+                "currency": currency,
+                "series": series,
+                "confidenceBandPct": 2.1,
+                "source": "서울외국환중개(Mock)",
+                "asOf": str(today),
+            }
+        async with httpx.AsyncClient(base_url=self.base_url, timeout=10) as client:
+            resp = await client.get("/internal/fx-rate/history", params={"currency": currency, "days": days})
+            resp.raise_for_status()
+            return resp.json()
+        
 def get_ai_client() -> AIServiceClient:
     return AIServiceClient()
