@@ -9,6 +9,7 @@ class Contract(Base):
     profile_id: Mapped[int] = mapped_column(ForeignKey("company_profile.profile_id"))
     contract_type: Mapped[str] = mapped_column(String(10))  # EXPORT/IMPORT
     payment_term: Mapped[str] = mapped_column(String(5))    # TT/LC/DP/DA
+    counterparty_country: Mapped[str] = mapped_column(String(5))  # 거래국가, 국가코드 (예: US)
     advance_settled_amount: Mapped[float | None] = mapped_column(Numeric(18, 2))
     netting_offset_amount: Mapped[float | None] = mapped_column(Numeric(18, 2))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

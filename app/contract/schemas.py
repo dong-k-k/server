@@ -24,6 +24,7 @@ class ContractCreateRequest(BaseModel):
     profile_id: int
     contract_type: str
     payment_term: str
+    counterparty_country: str = Field(min_length=2, max_length=5)
     advance_settled_amount: Decimal | None = None
     netting_offset_amount: Decimal | None = None
     settlement_items: list[SettlementItemCreate] = Field(default_factory=list)
@@ -34,6 +35,7 @@ class ContractResponse(BaseModel):
     profile_id: int
     contract_type: str
     payment_term: str
+    counterparty_country: str
     advance_settled_amount: Decimal | None = None
     netting_offset_amount: Decimal | None = None
     settlement_items: list[SettlementItemResponse] = Field(default_factory=list)
