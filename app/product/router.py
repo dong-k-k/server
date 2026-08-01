@@ -88,7 +88,8 @@ async def create_product_match(
         risk_profile_id=payload.risk_profile_id,
         items=[ProductMatchItem(**item) for item in items],
     )
-    return await product_repo.save_match_result(match)
+    saved = await product_repo.save_match_result(match)
+    return await product_repo.find_match_result_by_id(saved.match_id)
 
 
 @router.get("/api/v1/product-matches/{match_id}", response_model=ProductMatchResponse)

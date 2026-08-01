@@ -46,3 +46,4 @@ class ProductMatchItem(Base):
     fit_score: Mapped[int] = mapped_column()
     reason_text: Mapped[str | None] = mapped_column(String(500))
     match_result: Mapped["ProductMatchResult"] = relationship(back_populates="items")
+    product: Mapped["ProductMaster"] = relationship()

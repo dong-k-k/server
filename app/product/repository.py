@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
 from app.contract.models import Contract, SettlementItem
-from app.product.models import ProductMaster, ProductMatchResult
+from app.product.models import ProductMaster, ProductMatchResult, ProductMatchItem
 
 class EligibilityRuleCreate(BaseModel):
     field: str
@@ -111,7 +111,7 @@ class ProductRepository:
         """
         stmt = (
             select(ProductMatchResult)
-            .options(selectinload(ProductMatchResult.items))
+            .options(selectinload(ProductMatchResult.items).selectinload(ProductMatchItem.product))
             .where(ProductMatchResult.match_id == match_id)
         )
         result = await self.db.execute(stmt)
