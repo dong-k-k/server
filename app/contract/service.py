@@ -27,7 +27,8 @@ class ContractService:
             )
             for item in req.settlement_items
         ]
-        return await self.repo.save(contract)
+        saved = await self.repo.save(contract)
+        return await self.repo.find_by_id(saved.contract_id)
 
     async def get_contract(self, contract_id: int) -> Contract | None:
         return await self.repo.find_by_id(contract_id)
@@ -56,7 +57,8 @@ class ContractService:
             )
             for item in req.settlement_items
         ]
-        return await self.repo.update(contract)
+        saved = await self.repo.save(contract)
+        return await self.repo.find_by_id(saved.contract_id)
 
     async def add_settlement_item_to_contract(
         self, contract_id: int, req: SettlementItemCreate

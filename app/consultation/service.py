@@ -40,7 +40,8 @@ class ConsultationService:
             request_product = ConsultationRequestProduct(product_id=product_id)
             consultation_request.selected_products.append(request_product)
 
-        return await self.repo.save(consultation_request)
+        saved = await self.repo.save(consultation_request)
+        return await self.repo.find_by_id(saved.request_id)
 
     async def get_request(self, request_id: int) -> Optional[ConsultationRequest]:
         """
@@ -53,4 +54,5 @@ class ConsultationService:
         if not consultation_request:
             return None
         consultation_request.status = status_value
-        return await self.repo.update(consultation_request)
+        await self.repo.update(consultation_request)
+        return await self.repo.find_by_id(request_id)

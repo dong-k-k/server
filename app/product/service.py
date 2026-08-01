@@ -39,7 +39,8 @@ class ProductService:
             )
             product.rules.append(rule)
 
-        return await self.repo.save(product)
+        saved = await self.repo.save(product)
+        return await self.repo.find_by_id(saved.product_id)
 
     async def get_product(self, product_id: str) -> Optional[ProductMaster]:
         """
