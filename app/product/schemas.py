@@ -50,12 +50,25 @@ class ProductEvaluationResult(BaseModel):
     verdict: Verdict
     fit_score: int
 
+class ProductSummary(BaseModel):
+    product_id: str
+    name: str
+    provider: str
+    direction: str
+    strategy_group: str
+    cost_info: Optional[str] = None
+    coverage_info: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class ProductMatchItemResponse(BaseModel):
     id: int
     product_id: str
     verdict: str
     fit_score: int
     reason_text: Optional[str] = None
+    product: Optional[ProductSummary] = None
 
     model_config = ConfigDict(from_attributes=True)
 
