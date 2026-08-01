@@ -17,7 +17,8 @@ class ProfileService:
             credit_grade=req.credit_grade,
         )
         profile.countries = [CounterpartCountry(country_code=c) for c in req.counterpart_countries]
-        return await self.repo.save(profile)
+        saved = await self.repo.save(profile)
+        return await self.repo.find_by_id(saved.profile_id)
 
     async def get_profile(self, profile_id: int) -> CompanyProfile | None:
       return await self.repo.find_by_id(profile_id)
