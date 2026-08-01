@@ -54,4 +54,5 @@ class ConsultationService:
         if not consultation_request:
             return None
         consultation_request.status = status_value
-        return await self.repo.update(consultation_request)
+        await self.repo.update(consultation_request)
+        return await self.repo.find_by_id(request_id)

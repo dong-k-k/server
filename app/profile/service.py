@@ -33,4 +33,5 @@ class ProfileService:
         ):
             setattr(profile, field, getattr(req, field))
         profile.countries = [CounterpartCountry(country_code=country) for country in req.counterpart_countries]
-        return await self.repo.update(profile)
+        await self.repo.update(profile)
+        return await self.repo.find_by_id(profile_id)
