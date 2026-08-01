@@ -33,3 +33,17 @@ class RiskAssessmentResponse(BaseModel):
     scenarios: list[ScenarioResponse] = []
 
     model_config = ConfigDict(from_attributes=True)
+
+class RatePoint(BaseModel):
+    date: str
+    rate: Decimal
+
+
+class RateHistoryResponse(BaseModel):
+    settlement_id: int
+    currency: str
+    bep_rate: Decimal | None = None
+    confidence_band_pct: Decimal | None = None
+    source: str
+    as_of: str
+    series: list[RatePoint]
