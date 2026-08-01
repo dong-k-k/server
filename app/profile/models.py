@@ -9,7 +9,7 @@ class CompanyProfile(Base):
     business_name: Mapped[str] = mapped_column(String(100))
     email: Mapped[str | None] = mapped_column(String(100))
     phone: Mapped[str | None] = mapped_column(String(20))
-    business_type: Mapped[str] = mapped_column(String(10))  # EXPORT/IMPORT/BOTH
+    business_type: Mapped[str] = mapped_column(String(10))
     annual_export_amount: Mapped[float | None] = mapped_column(Numeric(18, 2))
     annual_import_amount: Mapped[float | None] = mapped_column(Numeric(18, 2))
     annual_revenue: Mapped[float | None] = mapped_column(Numeric(18, 2))
@@ -17,8 +17,9 @@ class CompanyProfile(Base):
     credit_grade: Mapped[str | None] = mapped_column(String(10))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
-    countries: Mapped[list["CounterpartCountry"]] = relationship(back_populates="profile")
-
+    countries: Mapped[list["CounterpartCountry"]] = relationship(
+        back_populates="profile", cascade="all, delete-orphan"
+    )
 
 class CounterpartCountry(Base):
     __tablename__ = "counterpart_country"
