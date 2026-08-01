@@ -36,7 +36,8 @@ class RiskAssessmentService:
                 export_pl_krw=s["exportPlKrw"], import_pl_krw=s["importPlKrw"], remark=s.get("remark"),
             ) for s in ai_result["scenarioTable"]
         ]
-        return await self.repo.save(assessment)
+        saved = await self.repo.save(assessment)
+        return await self.repo.find_by_id(saved.assessment_id)
 
     @staticmethod
     def _map_action(risk_grade: str) -> str:
