@@ -12,6 +12,7 @@ class ContractService:
             profile_id=req.profile_id,
             contract_type=req.contract_type,
             payment_term=req.payment_term,
+            counterparty_country=req.counterparty_country,
             advance_settled_amount=req.advance_settled_amount,
             netting_offset_amount=req.netting_offset_amount,
         )
@@ -41,6 +42,7 @@ class ContractService:
         contract.profile_id = req.profile_id
         contract.contract_type = req.contract_type
         contract.payment_term = req.payment_term
+        contract.counterparty_country = req.counterparty_country
         contract.advance_settled_amount = req.advance_settled_amount
         contract.netting_offset_amount = req.netting_offset_amount
         contract.settlement_items = [

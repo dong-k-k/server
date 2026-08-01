@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif; color: #2a2a2a; margin: 0; padding: 28px 36px; font-size: 11px; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  .sub { font-size: 11px; color: #888; margin-bottom: 16px; }
+  .badge { display: inline-block; border-radius: 14px; padding: 4px 12px; font-size: 11px; font-weight: 700; color: #fff; }
+  .badge.LOW { background: #4A9E6E; }
+  .badge.MEDIUM { background: #F0A05C; }
+  .badge.HIGH { background: #B23B2E; }
+  .summary-box { background: #FEF3EC; border: 1px solid #F0C9A8; border-radius: 10px; padding: 14px 18px; margin-bottom: 18px; }
+  .summary-box p { margin: 8px 0 0; font-size: 12px; line-height: 1.6; }
+  .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 18px; }
+  .cell { border: 1px solid #EFEBE2; border-radius: 8px; padding: 8px 10px; }
+  .cell .lbl { font-size: 9.5px; color: #898989; }
+  .cell .val { font-size: 12px; font-weight: 700; margin-top: 3px; }
+  table { width: 100%; border-collapse: collapse; font-size: 10.5px; margin-bottom: 18px; }
+  th, td { text-align: left; padding: 6px 8px; border-top: 1px solid #EFEBE2; }
+  th { color: #898989; font-weight: 600; }
+  tr.zero { background: #FFF9EB; }
+  .loss { color: #B23B2E; }
+  .gain { color: #2E7D50; }
+  section { margin-bottom: 20px; }
+  h2 { font-size: 13px; margin: 0 0 8px; color: #545045; }
+  .product-row { display: flex; justify-content: space-between; align-items: center; border: 1px solid #EFEBE2; border-radius: 8px; padding: 8px 12px; margin-bottom: 6px; }
+  .product-row .verdict { font-size: 10px; font-weight: 700; border-radius: 10px; padding: 2px 8px; }
+  .verdict.ELIGIBLE { background: #E5F1E9; color: #2E7D50; }
+  .verdict.CONDITIONAL { background: #FFF3D6; color: #8C7046; }
+  .verdict.NOT_ELIGIBLE { background: #F4EFE4; color: #898989; }
+  .mix-row { display: flex; justify-content: space-between; border-top: 1px solid #EFEBE2; padding: 6px 4px; font-size: 11px; }
+  footer { font-size: 9px; color: #aaa; margin-top: 20px; line-height: 1.5; }
+</style>
+</head>
+<body>
+  <h1>FX Mate 환율 리스크 진단 리포트</h1>
+  <div class="sub">진단ID {{ assessment.assessment_id }} · 정산건 {{ assessment.settlement_id }} · 진단일시 {{ assessment.created_at.strftime('%Y-%m-%d %H:%M') if assessment.created_at else '-' }}</div>
+
+  <div class="summary-box">
+    <span class="badge {{ assessment.risk_grade }}">{{ risk_grade_labels.get(assessment.risk_grade, assessment.risk_grade) }} · 97.5% ES {{ assessment.es_pct }}%</span>
+    <p>
+      현재 환율 {{ assessment.current_rate }}원 기준, 환율이 불리하게 {{ assessment.es_pct }}% 움직일 경우 약
+      {{ "{:,.0f}".format(assessment.expected_max_loss) }}원의 손실이 예상됩니다.
+      권장 조치: <b>{{ action_labels.get(assessment.recommended_action, assessment.recommended_action) }}</b>
+    </p>
+  </div>
+
+  <section>
+    <h2>진단 지표</h2>
+    <div class="grid">
+      <div class="cell"><div class="lbl">현재 환율</div><div class="val">{{ assessment.current_rate }}원</div></div>
+      <div class="cell"><div class="lbl">계약 환율</div><div class="val">{{ assessment.contract_rate }}원</div></div>
+      <div class="cell"><div class="lbl">순노출액</div><div class="val">{{ "{:,.0f}".format(assessment.net_exposure) }}</div></div>
+      <div class="cell"><div class="lbl">평가손익</div><div class="val">{{ "{:,.0f}".format(assessment.valuation_pl) }}원</div></div>
+      <div class="cell"><div class="lbl">남은 영업일</div><div class="val">{{ assessment.holding_days }}일</div></div>
+      <div class="cell"><div class="lbl">BEP 갭</div><div class="val">{{ assessment.bep_gap if assessment.bep_gap is not none else '-' }}</div></div>
+      <div class="cell"><div class="lbl">BEP 안전여유율</div><div class="val">{{ assessment.bep_safety_margin_pct if assessment.bep_safety_margin_pct is not none else '-' }}%</div></div>
+      <div class="cell"><div class="lbl">97.5% ES 변동률</div><div class="val">{{ assessment.es_pct }}%</div></div>
+      <div class="cell"><div class="lbl">예상 최대 손실액</div><div class="val">{{ "{:,.0f}".format(assessment.expected_max_loss) }}원</div></div>
+      <div class="cell"><div class="lbl">데이터 신뢰도</div><div class="val">{{ assessment.data_confidence }}</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>환율 시나리오</h2>
+    <table>
+      <tr><th>변동률</th><th>예상환율</th><th>수출기업 손익(원)</th><th>수입기업 손익(원)</th><th>비고</th></tr>
+      {% for s in assessment.scenarios|sort(attribute='scenario_pct') %}
+      <tr class="{{ 'zero' if s.scenario_pct == 0 }}">
+        <td>{{ '%+g'|format(s.scenario_pct) }}%</td>
+        <td>{{ s.projected_rate }}</td>
+        <td class="{{ 'loss' if s.export_pl_krw < 0 else 'gain' if s.export_pl_krw > 0 else '' }}">{{ "{:,.0f}".format(s.export_pl_krw) }}</td>
+        <td class="{{ 'loss' if s.import_pl_krw < 0 else 'gain' if s.import_pl_krw > 0 else '' }}">{{ "{:,.0f}".format(s.import_pl_krw) }}</td>
+        <td>{{ s.remark or '-' }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </section>
+
+  <section>
+    <h2>추천 금융상품</h2>
+    {% for item in match_items %}
+    <div class="product-row">
+      <div>
+        <b>{{ item.product_id }}</b>
+        <div style="color:#898989;font-size:10px;margin-top:2px">{{ item.reason_text or '' }}</div>
+      </div>
+      <div style="text-align:right">
+        <span class="verdict {{ item.verdict }}">{{ verdict_labels.get(item.verdict, item.verdict) }}</span>
+        <div style="font-size:10px;color:#898989;margin-top:2px">적합도 {{ item.fit_score }}점</div>
+      </div>
+    </div>
+    {% else %}
+    <div style="color:#898989">매칭된 상품이 없습니다.</div>
+    {% endfor %}
+  </section>
+
+  <section>
+    <h2>AI 최종 권장 전략</h2>
+    <p style="font-size:12px;line-height:1.6;margin:0 0 8px">{{ recommendation.recommendation_reason or '-' }}</p>
+    {% for mix in recommendation.recommendation_mix %}
+    <div class="mix-row">
+      <span>{{ mix.get('strategyType', '-') }}{% if mix.get('productId') %} · {{ mix.get('productId') }}{% endif %}</span>
+      <span>{{ (mix.get('allocationRatio', 0) * 100)|round(0)|int }}%</span>
+    </div>
+    {% endfor %}
+  </section>
+
+  <footer>
+    본 리포트는 FX Mate에서 자동 생성되었습니다. 환율 분석 및 금융상품 추천 결과는 참고용이며, 실제 상품 가입 가능 여부·적용 환율·금리·한도·필요 서류는 금융기관 심사 및 상담 결과에 따라 달라질 수 있습니다.
+  </footer>
+</body>
+</html>
