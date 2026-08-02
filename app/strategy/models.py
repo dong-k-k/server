@@ -14,3 +14,4 @@ class StrategyRecommendation(Base):
     recommendation_mix: Mapped[list] = mapped_column(JSON)
     recommendation_reason: Mapped[str | None] = mapped_column(String(1000))
     pdf_url: Mapped[str | None] = mapped_column(String(300))
+    avoided_loss_by_product: Mapped[list | None] = mapped_column(JSON)

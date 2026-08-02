@@ -17,11 +17,31 @@ class AIServiceClient:
         """클라이언트 리소스 해제"""
         await self.client.aclose()
 
-    async def get_risk_assessment(self, payload: dict) -> dict:
-        async with httpx.AsyncClient(base_url=self.base_url, timeout=5) as client:
-          resp = await client.post("/internal/risk-assessment", json=payload)
-          resp.raise_for_status()
-          return resp.json()
+    async def get_hedge_analysis(
+        self, currency_pair: str, side: str, foreign_amount: float,
+        settlement_date: str, reference_rate: float,
+        hedged_amount: float = 0.0, hedge_rate: float | None = None,
+    ) -> dict | None:
+
+        payload = {
+            "currency_pair": currency_pair,
+            "side": side,  # "payment" 또는 "receipt"
+            "foreign_amount": foreign_amount,
+            "settlement_date": settlement_date,
+            "reference_rate": reference_rate,
+            "hedged_amount": hedged_amount,
+        }
+        if hedged_amount > 0:
+            payload["hedge_rate"] = hedge_rate
+
+        try:
+            resp = await self.client.post("/internal/hedge-analysis", json=payload)
+        except (httpx.HTTPError, httpx.TimeoutException):
+            return None
+        if resp.status_code == 422:
+            return None
+        resp.raise_for_status()
+        return resp.json()
 
     async def get_product_reason(self, payload: dict) -> dict:
         if self.mock_mode:

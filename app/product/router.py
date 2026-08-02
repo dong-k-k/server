@@ -1,62 +1,18 @@
 # app/product/router.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.product.repository import ProductRepository
-from app.product.schemas import ProductMasterCreate, ProductMasterResponse, ProductMatchRequest, ProductMatchResponse
-from app.product.service import ProductService, ProductMatchService
+from app.product.schemas import ProductMatchRequest, ProductMatchResponse
 from app.core.db import get_db
-from app.clients.ai_service_client import get_ai_client
 from app.contract.repository import ContractRepository
 from app.product.models import ProductMatchItem, ProductMatchResult
 from app.risk.repository import RiskRepository
 from app.risk_profile.repository import RiskProfileRepository
+from app.strategy.strategy_rules import build_strategy_context
+from app.clients.rag_client import call_recommend
 
-router = APIRouter(tags=["Admin Product Master"])
-
-
-def get_product_service(db: AsyncSession = Depends(get_db)) -> ProductService:
-    repo = ProductRepository(db)
-    return ProductService(repo)
-
-
-@router.post(
-    "/api/v1/admin/products",
-    response_model=ProductMasterResponse,
-    status_code=status.HTTP_201_CREATED,
-    summary="상품 마스터 등록 (관리자)",
-)
-async def create_product(
-    payload: ProductMasterCreate,
-    service: ProductService = Depends(get_product_service),
-):
-    return await service.create_product(payload)
-
-
-@router.get(
-    "/api/v1/admin/products/{id}",
-    response_model=ProductMasterResponse,
-    status_code=status.HTTP_200_OK,
-    summary="상품 마스터 단건 조회 (관리자)",
-)
-async def get_product(
-    id: str, # product_id
-    service: ProductService = Depends(get_product_service),
-):
-    product = await service.get_product(id)
-    if not product:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Product with ID {id} not found",
-        )
-    return product
-
-
-@router.get("/api/v1/products", response_model=list[ProductMasterResponse])
-async def list_products(
-    strategy_group: str | None = None,
-    db: AsyncSession = Depends(get_db),
-):
-    return await ProductRepository(db).find_all_by_strategy_group(strategy_group)
+router = APIRouter(tags=["product-matches"])
 
 
 @router.post("/api/v1/product-matches", response_model=ProductMatchResponse, status_code=status.HTTP_201_CREATED)
