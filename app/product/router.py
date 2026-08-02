@@ -28,7 +28,7 @@ async def create_product_match(payload: ProductMatchRequest, db: AsyncSession = 
     net_exposure_krw = (
         float(settlement.amount) - float(contract.advance_settled_amount or 0)
         - float(contract.netting_offset_amount or 0)
-    ) * assessment.current_rate
+    ) * float(assessment.current_rate)
 
     strategy_context = build_strategy_context(
         assessment.risk_grade, risk_profile.profile_type,
