@@ -5,7 +5,7 @@ from app.clients.ai_service_client import get_ai_client
 from app.contract.repository import ContractRepository
 from app.core.db import get_db
 from app.risk.repository import RiskRepository
-from app.risk.schemas import RiskAssessmentResponse, RateHistoryResponse, RatePoint
+from app.risk.schemas import RiskAssessmentResponse, RateHistoryResponse, RatePoint, RateForecastResponse
 from app.risk.service import RiskAssessmentService
 
 router = APIRouter(prefix="/api/v1", tags=["risk-assessments"])
@@ -64,3 +64,21 @@ async def get_rate_history(
         as_of=history["asOf"],
         series=[RatePoint(**p) for p in history["series"]],
     )
+
+@router.get("/settlement-items/{settlement_id}/rate-forecast", response_model=RateForecastResponse)
+async def get_rate_forecast(settlement_id: int, db: AsyncSession = Depends(get_db)):
+    settlement = await ContractRepository(db).find_settlement_by_id(settlement_id)
+    if not settlement:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Settlement item not found")
+    if settlement.currency != "USD":
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"현재 환율 예측은 USD만 지원합니다: {settlement.currency}",
+        )
+    forecast = await get_ai_client().get_fx_forecast()
+    if forecast is None:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="환율 예측 서비스(fx-chronos)에서 응답을 받지 못했습니다",
+        )
+    return RateForecastResponse(settlement_id=settlement_id, **forecast)

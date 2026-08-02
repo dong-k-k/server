@@ -41,3 +41,22 @@ class ContractResponse(BaseModel):
     settlement_items: list[SettlementItemResponse] = Field(default_factory=list)
 
     model_config = ConfigDict(from_attributes=True)
+
+class ForecastPoint(BaseModel):
+    date: str
+    point: Decimal
+    lower: Decimal
+    median: Decimal
+    upper: Decimal
+
+
+class RateForecastResponse(BaseModel):
+    settlement_id: int
+    currency_pair: str
+    forecast_origin: str
+    horizon: int
+    unit: str
+    model_name: str
+    generated_at: str
+    forecast: list[ForecastPoint]
+    warnings: list[str]

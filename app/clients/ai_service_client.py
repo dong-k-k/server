@@ -43,6 +43,21 @@ class AIServiceClient:
         resp.raise_for_status()
         return resp.json()
 
+    async def get_fx_forecast(self) -> dict | None:
+        """
+        fx-chronos GET /internal/fx-forecast 연동.
+        통화쌍과 무관하게 항상 USD/KRW 기준 H90(90일) 고정 예측 시계열을 반환한다.
+        (요청 파라미터 없음 — settlement_date별로 다른 값을 주지 않고, 매번 오늘 기준 90일치 전체를 준다)
+        실패하면 None을 반환해서 호출측이 폴백(예측 없음) 처리하게 한다.
+        """
+        try:
+            resp = await self.client.get("/internal/fx-forecast")
+        except (httpx.HTTPError, httpx.TimeoutException):
+            return None
+        if resp.status_code >= 400:
+            return None
+        return resp.json()
+        
     async def get_current_rate(self, currency: str) -> dict:
         if self.mock_mode:
             return {"currency": currency, "rate": 1350.0}
