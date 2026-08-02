@@ -22,6 +22,7 @@ class AIServiceClient:
         settlement_date: str, reference_rate: float,
         hedged_amount: float = 0.0, hedge_rate: float | None = None,
     ) -> dict | None:
+
         payload = {
             "currency_pair": currency_pair,
             "side": side,  # "payment" 또는 "receipt"
@@ -40,7 +41,7 @@ class AIServiceClient:
         if resp.status_code == 422:
             return None
         resp.raise_for_status()
-        return resp.json()s
+        return resp.json()
 
     async def get_product_reason(self, payload: dict) -> dict:
         if self.mock_mode:

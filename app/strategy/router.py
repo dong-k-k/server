@@ -3,6 +3,7 @@ from fastapi.responses import Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.clients.ai_service_client import get_ai_client
+from app.contract.repository import ContractRepository
 from app.core.db import get_db
 from app.product.repository import ProductRepository
 from app.risk.repository import RiskRepository
@@ -25,11 +26,16 @@ async def create_strategy_recommendation(
     service: StrategyService = Depends(get_strategy_service),
     db: AsyncSession = Depends(get_db),
 ):
+    contract_repo = ContractRepository(db)
     assessment = await RiskRepository(db).find_by_settlement_id(payload.settlement_id)
     risk_profile = await RiskProfileRepository(db).find_by_id(payload.risk_profile_id)
     match_result = await ProductRepository(db).find_match_result_by_id(payload.match_id)
-    if not (assessment and risk_profile and match_result):
+    settlement = await contract_repo.find_settlement_by_id(payload.settlement_id)
+    if not (assessment and risk_profile and match_result and settlement):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Required analysis data not found")
+    contract = await contract_repo.find_by_id(settlement.contract_id)
+    direction = "EXPORT" if contract.contract_type == "EXPORT" else "IMPORT"
+
     return await service.recommend(
         settlement_id=payload.settlement_id,
         match_id=payload.match_id,
@@ -37,6 +43,8 @@ async def create_strategy_recommendation(
         assessment=assessment,
         risk_profile=risk_profile,
         candidates=match_result.items,
+        settlement=settlement,
+        direction=direction,
     )
 
 

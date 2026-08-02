@@ -15,6 +15,7 @@ class StrategyRecommendationResponse(BaseModel):
     risk_profile_id: int
     recommendation_mix: list[dict[str, Any]]
     recommendation_reason: Optional[str] = None
+    avoided_loss_by_product: Optional[list[dict[str, Any]]] = None
     pdf_url: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)

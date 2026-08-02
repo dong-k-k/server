@@ -44,8 +44,6 @@ class RiskAssessmentService:
             return None
         if (settlement.settlement_date - date.today()).days > AI_MAX_HORIZON_DAYS:
             return None
-        if settlement.settlement_date.weekday() >= 5:
-            return None
 
         current = await self.ai_client.get_current_rate(settlement.currency)
         ai_result = await self.ai_client.get_hedge_analysis(
