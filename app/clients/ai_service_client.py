@@ -43,28 +43,6 @@ class AIServiceClient:
         resp.raise_for_status()
         return resp.json()
 
-    async def get_product_reason(self, payload: dict) -> dict:
-        if self.mock_mode:
-            return {"reasonText": "(Mock) 대상통화·헤지기간 조건 충족"}
-
-        resp = await self.client.post("/internal/product-reason", json=payload)
-        resp.raise_for_status()
-        return resp.json()
-
-    async def get_strategy_mix(self, payload: dict) -> dict:
-        if self.mock_mode:
-            return {
-                "recommendationMix": [
-                    {"strategyType": "FULL_COVER_INSURANCE", "productId": "KSURE-FX-001", "allocationRatio": 0.5},
-                    {"strategyType": "FORWARD", "productId": "KB-FWD-001", "allocationRatio": 0.5},
-                ],
-                "recommendationReason": "(Mock) 리스크등급 HIGH, ES 6.2% 기준 혼합헤지 추천",
-            }
-
-        resp = await self.client.post("/internal/strategy-mix", json=payload)
-        resp.raise_for_status()
-        return resp.json()
-
     async def get_current_rate(self, currency: str) -> dict:
         if self.mock_mode:
             return {"currency": currency, "rate": 1350.0}
