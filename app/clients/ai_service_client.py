@@ -18,15 +18,16 @@ class AIServiceClient:
         """클라이언트 리소스 해제"""
         await self.client.aclose()
 
+    logger = logging.getLogger(__name__)
+
     async def get_hedge_analysis(
         self, currency_pair: str, side: str, foreign_amount: float,
         settlement_date: str, reference_rate: float,
         hedged_amount: float = 0.0, hedge_rate: float | None = None,
     ) -> dict | None:
-
         payload = {
             "currency_pair": currency_pair,
-            "side": side,  # "PAYABLE" 또는 "RECEIVABLE"
+            "side": side,
             "foreign_amount": foreign_amount,
             "settlement_date": settlement_date,
             "reference_rate": reference_rate,
@@ -37,9 +38,11 @@ class AIServiceClient:
 
         try:
             resp = await self.client.post("/internal/hedge-analysis", json=payload)
-        except (httpx.HTTPError, httpx.TimeoutException):
+        except (httpx.HTTPError, httpx.TimeoutException) as e:
+            logger.error(f"hedge-analysis 호출 실패: {type(e).__name__}: {e} / payload={payload}")
             return None
         if resp.status_code == 422:
+            logger.error(f"hedge-analysis 422: {resp.text} / payload={payload}")
             return None
         resp.raise_for_status()
         return resp.json()
