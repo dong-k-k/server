@@ -1,18 +1,18 @@
-HEDGE_RATIO_BY_PROFILE = {"STABILITY_FIRST": 90, "BALANCED": 65, "COST_OPPORTUNITY_FIRST": 35}
-ACTION_BY_GRADE = {"HIGH": "IMMEDIATE_HEDGE", "MEDIUM": "PARTIAL_HEDGE_MONITOR", "LOW": "TARGET_ORDER"}
+STRATEGY_BY_PROFILE = {
+    "STABILITY_FIRST": [("FORWARD", 0.7), ("FX_INSURANCE_GENERAL", 0.3)],
+    "BALANCED": [("FX_INSURANCE_OPTION", 0.5), ("FORWARD", 0.5)],
+    "COST_OPPORTUNITY_FIRST": [("FX_INSURANCE_OPTION", 0.6), ("FOREIGN_CURRENCY_DEPOSIT", 0.4)],
+}
 
-def decide_strategy_mix(risk_grade: str, profile_type: str, candidates: list[dict]) -> dict:
-    target_ratio = HEDGE_RATIO_BY_PROFILE[profile_type]
-    action = ACTION_BY_GRADE[risk_grade]
 
-    full_cover = next((c for c in candidates if c.get("strategy_group") == "FX_HEDGING"), None)
-    alt = next((c for c in candidates if c is not full_cover), None)
-
-    mix = []
-    if full_cover:
-        mix.append({"strategyType": "FULL_COVER", "productId": full_cover["product_id"], "allocationRatio": target_ratio / 100})
-    if alt:
-        mix.append({"strategyType": "SUPPLEMENTARY", "productId": alt["product_id"], "allocationRatio": (100 - target_ratio) / 100})
-
-    reason = f"위험등급 {risk_grade}, 성향 {profile_type} 기준 목표 헤지비율 {target_ratio}%로 {action} 권장"
-    return {"recommendedAction": action, "recommendationMix": mix, "recommendationReason": reason}
+def build_strategy_context(risk_grade: str, profile_type: str, target_ratio_min: float, target_ratio_max: float) -> dict:
+    strategies = STRATEGY_BY_PROFILE[profile_type]
+    return {
+        "hedgeTargetMin": target_ratio_min / 100,
+        "hedgeTargetMax": target_ratio_max / 100,
+        "groupTargets": [{"targetHedgeRatio": (target_ratio_min + target_ratio_max) / 200}],
+        "strategies": [
+            {"strategyType": st, "allocationRatio": ratio, "priority": i + 1}
+            for i, (st, ratio) in enumerate(strategies)
+        ],
+    }
