@@ -4,7 +4,7 @@ from app.strategy.hedge_calculator import compute_avoided_loss_for_cards
 ACTION_LABELS = {
     "LOW": "목표환율 알림 설정",
     "MEDIUM": "부분 헤지 및 환율 추이 모니터링",
-    "HIGH": "즉시 헤지 실행 권장",
+    "HIGH": "즉시 헤지 실행",
 }
 RISK_GRADE_LABELS = {"LOW": "낮음", "MEDIUM": "중간", "HIGH": "높음"}
 PROFILE_TYPE_LABELS = {
@@ -62,13 +62,21 @@ class StrategyService:
                 "note": "직원 확인 후 배분비율이 반영됩니다.",
             })
 
-        recommendation_reason = (
-            f"위험등급 {assessment.risk_grade}(ES {assessment.es_pct}%), "
-            f"{risk_profile.profile_type} 성향 기준 목표 헤지비율 "
-            f"{risk_profile.target_hedge_ratio_min}~{risk_profile.target_hedge_ratio_max}% — "
-            f"{ACTION_LABELS[assessment.risk_grade]}. "
-            f"추천 상품 {len(recommendation_mix)}건은 RAG 적합도·자격 판정 결과를 기준으로 산정."
+        mix_summary = ", ".join(
+            f"{item['productName']} {round(item['allocationRatio'] * 100)}%"
+            for item in recommendation_mix
+            if item.get("allocationRatio") is not None
         )
+
+        recommendation_reason = (
+            f"현재 환리스크는 '{RISK_GRADE_LABELS[assessment.risk_grade]}' 등급"
+            f"(예상 손실률 {float(assessment.es_pct):.1f}%)으로 분석되었습니다. "
+            f"{PROFILE_TYPE_LABELS[risk_profile.profile_type]} 성향에 따른 목표 헤지비율"
+            f"({risk_profile.target_hedge_ratio_min}~{risk_profile.target_hedge_ratio_max}%)을 고려할 때, "
+            f"{ACTION_LABELS[assessment.risk_grade]}이 필요합니다. "
+            f"아래 추천 상품 {len(recommendation_mix)}건은 AI 적합도 분석과 자격 심사 결과를 기준으로 선정되었습니다. "
+            f"이렇게 하세요: {mix_summary}로 배분해 헤지하는 것을 권장합니다."
+)
 
         cards = [
             {
