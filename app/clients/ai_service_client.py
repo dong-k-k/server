@@ -89,24 +89,33 @@ class AIServiceClient:
         }
 
     async def get_rate_history(self, currency: str, days: int = 180) -> dict:
-        if self.mock_mode:
-            today = date.today()
-            rate = 1350.0
-            series = []
-            for i in range(days, -1, -1):
-                rate += random.uniform(-6, 6)
-                series.append({"date": str(today - timedelta(days=i)), "rate": round(rate, 2)})
-            return {
-                "currency": currency,
-                "series": series,
-                "confidenceBandPct": 2.1,
-                "source": "서울외국환중개(Mock)",
-                "asOf": str(today),
-            }
+        if currency != "USD":
+            raise ValueError(f"ECOS 실계열은 현재 USD만 지원: {currency}")
 
-        resp = await self.client.get("/internal/fx-rate/history", params={"currency": currency, "days": days})
-        resp.raise_for_status()
-        return resp.json()
+        end = date.today()
+        start = end - timedelta(days=int(days * 1.6))  # 주말/공휴일 감안 여유분
+
+        async with httpx.AsyncClient(timeout=15) as client:
+            resp = await client.get(
+                f"https://ecos.bok.or.kr/api/StatisticSearch/{settings.ecos_api_key}"
+                f"/json/kr/1/{days + 50}/731Y001/D/{start.strftime('%Y%m%d')}/{end.strftime('%Y%m%d')}/0000001"
+            )
+            resp.raise_for_status()
+            payload = resp.json()
+
+        if "StatisticSearch" not in payload:
+            raise RuntimeError(f"ECOS 응답 오류: {payload}")
+
+        rows = payload["StatisticSearch"]["row"]
+        series = [
+            {"date": f"{r['TIME'][:4]}-{r['TIME'][4:6]}-{r['TIME'][6:]}", "rate": float(r["DATA_VALUE"])}
+            for r in rows
+        ][-days:]
+
+        return {
+            "currency": currency, "series": series, "confidenceBandPct": None,
+            "source": "한국은행 ECOS(731Y001)", "asOf": series[-1]["date"] if series else str(end),
+        }
 
 
 # 싱글톤 패턴 또는 의존성 주입용 팩토리 함수
