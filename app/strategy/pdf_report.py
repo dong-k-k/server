@@ -27,7 +27,9 @@ async def render_report_pdf(assessment, match_items, recommendation) -> bytes:
         eligibility_labels=ELIGIBILITY_LABELS,
     )
     async with async_playwright() as p:
-        browser = await p.chromium.launch()
+        browser = await p.chromium.launch(
+            args=["--no-sandbox", "--disable-setuid-sandbox"]
+        )
         page = await browser.new_page()
         await page.set_content(html_content, wait_until="networkidle")
         pdf_bytes = await page.pdf(format="A4", print_background=True)

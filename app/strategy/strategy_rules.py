@@ -23,8 +23,7 @@ BASE_STRATEGY_BY_PROFILE = {
 # 없을수록 이 그룹의 비중을 늘린다. 옵션형/예금형은 반대로 줄인다.
 CERTAINTY_STRATEGY_TYPES = {"FORWARD", "FX_INSURANCE_GENERAL"}
 
-# TODO(팀 검토 필요): 아래 임계값·조정폭은 초안입니다. 실제 헤지 이론/상품
-# 특성에 맞는지 세영님·희수님 검토 후 확정 필요.
+# TODO : 추후 변경할 수 있다.
 HIGH_ES_PCT_THRESHOLD = 10.0        # ES%가 이보다 높으면 "위험이 크다"고 판단
 LOW_BEP_MARGIN_PCT_THRESHOLD = 3.0  # BEP 안전여유율이 이보다 낮으면 "손익분기 임박"
 SHIFT_STEP = 0.1                    # 조건 1개 충족 시 확정형 쪽으로 옮기는 비중
