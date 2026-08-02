@@ -1,7 +1,8 @@
 import random
 from datetime import date, timedelta
 from typing import Optional
-
+import logging
+from venv import logger
 import httpx
 from app.core.config import settings
 
@@ -43,6 +44,7 @@ class AIServiceClient:
         resp.raise_for_status()
         return resp.json()
 
+    logger = logging.getLogger(__name__)
     async def get_fx_forecast(self) -> dict | None:
         """
         fx-chronos GET /internal/fx-forecast 연동.
@@ -51,10 +53,12 @@ class AIServiceClient:
         실패하면 None을 반환해서 호출측이 폴백(예측 없음) 처리하게 한다.
         """
         try:
-            resp = await self.client.get("/internal/fx-forecast")
-        except (httpx.HTTPError, httpx.TimeoutException):
+            resp = await self.client.get("/internal/fx-forecast", timeout=5.0)
+        except (httpx.HTTPError, httpx.TimeoutException) as e:
+            logger.error(f"fx-forecast 호출 실패: {type(e).__name__}: {e}")
             return None
         if resp.status_code >= 400:
+            logger.error(f"fx-forecast 응답 오류: {resp.status_code} {resp.text}")
             return None
         return resp.json()
         
