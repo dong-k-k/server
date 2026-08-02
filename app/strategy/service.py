@@ -7,6 +7,9 @@ ACTION_LABELS = {
     "HIGH": "즉시 헤지 실행 권장",
 }
 
+MIX_ELIGIBLE_STATUSES = ("RECOMMENDED", "CONDITIONAL")
+MAX_STRATEGY_CARDS = 3
+
 
 class StrategyService:
     def __init__(self, repo, ai_client):
@@ -17,24 +20,40 @@ class StrategyService:
         self, settlement_id, match_id, risk_profile_id, assessment, risk_profile, candidates,
         settlement, direction,
     ) -> "StrategyRecommendation":
-        # RECOMMENDED/CONDITIONAL 상품만 최종 믹스에 포함 (RM_REVIEW_REQUIRED/NOT_RECOMMENDED 제외).
-        # 하나도 없으면 매칭된 전체 후보로 폴백.
-        selected = [c for c in candidates if c.eligibility_status in ("RECOMMENDED", "CONDITIONAL")] or list(candidates)
+        # 적합도 상위 3개까지만 전략 카드 후보로 사용 — "추천 금융상품" 섹션과
+        # 동일한 정렬 기준을 적용해 두 섹션의 순위가 어긋나지 않게 한다.
+        ranked_candidates = sorted(candidates, key=lambda c: c.fit_score, reverse=True)[:MAX_STRATEGY_CARDS]
 
-        total_hedge_krw = sum(float(c.recommended_hedge_amount_krw or 0) for c in selected)
+        confirmed = [c for c in ranked_candidates if c.eligibility_status in MIX_ELIGIBLE_STATUSES]
+        needs_review = [c for c in ranked_candidates if c.eligibility_status not in MIX_ELIGIBLE_STATUSES]
+        if not confirmed:
+            # 전부 RM_REVIEW_REQUIRED뿐이면(기존 동작 유지) 전체를 배분 대상으로 취급
+            confirmed, needs_review = ranked_candidates, []
+
+        total_hedge_krw = sum(float(c.recommended_hedge_amount_krw or 0) for c in confirmed)
         recommendation_mix = []
-        for c in selected:
+        for c in confirmed:
             hedge_krw = float(c.recommended_hedge_amount_krw or 0)
             if total_hedge_krw > 0:
                 allocation_ratio = round(hedge_krw / total_hedge_krw, 2)
             else:
-                allocation_ratio = round(1 / len(selected), 2)
+                allocation_ratio = round(1 / len(confirmed), 2)
             recommendation_mix.append({
                 "productId": c.product_id,
                 "productName": c.product_name,
                 "provider": c.provider,
                 "eligibilityStatus": c.eligibility_status,
                 "allocationRatio": allocation_ratio,
+            })
+
+        for c in needs_review:
+            recommendation_mix.append({
+                "productId": c.product_id,
+                "productName": c.product_name,
+                "provider": c.provider,
+                "eligibilityStatus": c.eligibility_status,
+                "allocationRatio": None,
+                "note": "직원 확인 후 배분비율이 반영됩니다.",
             })
 
         recommendation_reason = (
@@ -50,7 +69,7 @@ class StrategyService:
                 "productId": c.product_id, "productName": c.product_name, "provider": c.provider,
                 "recommendedHedgeAmountKrw": float(c.recommended_hedge_amount_krw) if c.recommended_hedge_amount_krw is not None else None,
             }
-            for c in candidates
+            for c in ranked_candidates
         ]
         cards_with_avoided_loss = await compute_avoided_loss_for_cards(
             cards, float(assessment.current_rate), direction, settlement, self.ai_client,

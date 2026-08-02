@@ -1,7 +1,20 @@
 STRATEGY_BY_PROFILE = {
-    "STABILITY_FIRST": [("FORWARD", 0.7), ("FX_INSURANCE_GENERAL", 0.3)],
-    "BALANCED": [("FX_INSURANCE_OPTION", 0.5), ("FORWARD", 0.5)],
-    "COST_OPPORTUNITY_FIRST": [("FX_INSURANCE_OPTION", 0.6), ("FOREIGN_CURRENCY_DEPOSIT", 0.4)],
+    # TODO : 비율조정하기
+    "STABILITY_FIRST": [
+        ("FORWARD", 0.5),
+        ("FX_INSURANCE_GENERAL", 0.3),
+        ("FX_INSURANCE_OPTION", 0.2),
+    ],
+    "BALANCED": [
+        ("FX_INSURANCE_OPTION", 0.4),
+        ("FORWARD", 0.4),
+        ("FOREIGN_CURRENCY_DEPOSIT", 0.2),
+    ],
+    "COST_OPPORTUNITY_FIRST": [
+        ("FX_INSURANCE_OPTION", 0.5),
+        ("FOREIGN_CURRENCY_DEPOSIT", 0.3),
+        ("FORWARD", 0.2),
+    ],
 }
 
 
