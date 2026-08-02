@@ -41,7 +41,7 @@ class StrategyService:
             f"위험등급 {assessment.risk_grade}(ES {assessment.es_pct}%), "
             f"{risk_profile.profile_type} 성향 기준 목표 헤지비율 "
             f"{risk_profile.target_hedge_ratio_min}~{risk_profile.target_hedge_ratio_max}% — "
-            f"{ACTION_LABELS[assessment.risk_grade]} 권장. "
+            f"{ACTION_LABELS[assessment.risk_grade]}. "
             f"추천 상품 {len(recommendation_mix)}건은 RAG 적합도·자격 판정 결과를 기준으로 산정."
         )
 
