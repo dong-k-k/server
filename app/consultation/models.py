@@ -30,6 +30,6 @@ class ConsultationRequestProduct(Base):
     __tablename__ = "consultation_request_product"
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     request_id: Mapped[int] = mapped_column(ForeignKey("consultation_request.request_id"))
-    product_id: Mapped[str] = mapped_column(ForeignKey("product_master.product_id"))
+    product_id: Mapped[str] = mapped_column(String(30))
 
     request: Mapped["ConsultationRequest"] = relationship(back_populates="selected_products")
