@@ -47,9 +47,6 @@ class ContractService:
         contract.advance_settled_amount = req.advance_settled_amount
         contract.netting_offset_amount = req.netting_offset_amount
 
-        # 기존 정산 항목은 삭제 후 재생성하지 않고 값만 덮어씀 —
-        # 이미 리스크 진단/상품매칭이 이 settlement_id를 참조 중이면
-        # 삭제 시 FK 제약 위반(500)이 나기 때문.
         existing_items = list(contract.settlement_items)
         for i, item in enumerate(req.settlement_items):
             if i < len(existing_items):
@@ -69,7 +66,6 @@ class ContractService:
                     )
                 )
         # 요청에 항목 수가 줄어든 경우, 남는 기존 항목은 지금은 삭제하지 않고 그대로 둠
-        # (이미 분석 결과가 붙어있을 수 있어 안전 우선)
 
         saved = await self.repo.save(contract)
         return await self.repo.find_by_id(saved.contract_id)
