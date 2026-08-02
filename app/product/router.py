@@ -33,6 +33,9 @@ async def create_product_match(payload: ProductMatchRequest, db: AsyncSession = 
     strategy_context = build_strategy_context(
         assessment.risk_grade, risk_profile.profile_type,
         risk_profile.target_hedge_ratio_min, risk_profile.target_hedge_ratio_max,
+        es_pct=float(assessment.es_pct),
+        bep_safety_margin_pct=float(assessment.bep_safety_margin_pct) if assessment.bep_safety_margin_pct is not None else None,
+        is_payment_adjustable=settlement.is_payment_adjustable,
     )
     rag_response = await call_recommend(settlement, contract, net_exposure_krw, assessment, strategy_context)
 
