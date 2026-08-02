@@ -86,7 +86,7 @@ class StrategyService:
             for c in ranked_candidates
         ]
         cards_with_avoided_loss = await compute_avoided_loss_for_cards(
-            cards, float(assessment.current_rate), direction, settlement, self.ai_client,
+            cards, float(assessment.current_rate), direction, settlement, self.ai_client, assessment,
         )
 
         rec = StrategyRecommendation(
