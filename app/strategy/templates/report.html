@@ -27,9 +27,10 @@
   h2 { font-size: 13px; margin: 0 0 8px; color: #545045; }
   .product-row { display: flex; justify-content: space-between; align-items: center; border: 1px solid #EFEBE2; border-radius: 8px; padding: 8px 12px; margin-bottom: 6px; }
   .product-row .verdict { font-size: 10px; font-weight: 700; border-radius: 10px; padding: 2px 8px; }
-  .verdict.ELIGIBLE { background: #E5F1E9; color: #2E7D50; }
+  .verdict.RECOMMENDED { background: #E5F1E9; color: #2E7D50; }
   .verdict.CONDITIONAL { background: #FFF3D6; color: #8C7046; }
-  .verdict.NOT_ELIGIBLE { background: #F4EFE4; color: #898989; }
+  .verdict.RM_REVIEW_REQUIRED { background: #E4EEF7; color: #33587A; }
+  .verdict.NOT_RECOMMENDED { background: #F4EFE4; color: #898989; }
   .mix-row { display: flex; justify-content: space-between; border-top: 1px solid #EFEBE2; padding: 6px 4px; font-size: 11px; }
   footer { font-size: 9px; color: #aaa; margin-top: 20px; line-height: 1.5; }
 </style>
@@ -82,19 +83,19 @@
   <section>
     <h2>추천 금융상품</h2>
     {% for item in match_items %}
-<div class="product-row">
-  <div>
-    <b>{{ item.product_name }}</b> <span style="color:#898989;font-size:10px">({{ item.provider }})</span>
-    <div style="color:#898989;font-size:10px;margin-top:2px">{{ item.reason_text or '' }}</div>
-  </div>
-  <div style="text-align:right">
-    <span class="verdict {{ item.eligibility_status }}">{{ eligibility_labels.get(item.eligibility_status, item.eligibility_status) }}</span>
-    <div style="font-size:10px;color:#898989;margin-top:2px">적합도 {{ item.fit_score }}점</div>
-  </div>
-</div>
-{% else %}
-<div style="color:#898989">매칭된 상품이 없습니다.</div>
-{% endfor %}
+    <div class="product-row">
+      <div>
+        <b>{{ item.product_name }}</b> <span style="color:#898989;font-size:10px">({{ item.provider }})</span>
+        <div style="color:#898989;font-size:10px;margin-top:2px">{{ item.reason_text or '' }}</div>
+      </div>
+      <div style="text-align:right">
+        <span class="verdict {{ item.eligibility_status }}">{{ eligibility_labels.get(item.eligibility_status, item.eligibility_status) }}</span>
+        <div style="font-size:10px;color:#898989;margin-top:2px">적합도 {{ item.fit_score }}점</div>
+      </div>
+    </div>
+    {% else %}
+    <div style="color:#898989">매칭된 상품이 없습니다.</div>
+    {% endfor %}
   </section>
 
   <section>

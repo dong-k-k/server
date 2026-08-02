@@ -6,8 +6,8 @@ class Settings(BaseSettings):
     ai_service_mock_mode: bool = True
     cors_origins: str = "http://localhost:5173"
     rag_base_url: str = "http://localhost:8001"
-    exim_api_key: str = "QItPgQVXjSZk2EZCk3mCorpPeyUrEUTD"
-    ecos_api_key: str = "3HEMWZ961Q61X8D1LFAH"
+    exim_api_key: str = ""
+    ecos_api_key: str = ""
 
     class Config:
         env_file = ".env"
