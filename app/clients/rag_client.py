@@ -1,6 +1,7 @@
 import httpx
 from app.core.config import settings
 
+
 async def call_recommend(settlement, contract, net_exposure_krw, assessment, strategy_context) -> dict:
     payload = {
         "companyProfile": {"tradeDirection": contract.contract_type, "currencies": [settlement.currency],
@@ -18,5 +19,7 @@ async def call_recommend(settlement, contract, net_exposure_krw, assessment, str
     }
     async with httpx.AsyncClient(base_url=settings.rag_base_url, timeout=10) as client:
         resp = await client.post("/recommend", json=payload)
-        resp.raise_for_status()
+        if resp.status_code >= 400:
+            # RAG가 준 422 detail을 그대로 로그에 남겨서 원인을 바로 보이게 함
+            raise RuntimeError(f"RAG /recommend {resp.status_code} 응답: {resp.text}")
         return resp.json()
