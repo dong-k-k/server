@@ -1,6 +1,6 @@
 import asyncio
 
-SIDE_BY_DIRECTION = {"EXPORT": "receipt", "IMPORT": "payment"}
+SIDE_BY_DIRECTION = {"EXPORT": "RECEIVABLE", "IMPORT": "PAYABLE"}
 
 
 async def compute_avoided_loss_for_cards(

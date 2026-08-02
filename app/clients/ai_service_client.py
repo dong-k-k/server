@@ -26,7 +26,7 @@ class AIServiceClient:
 
         payload = {
             "currency_pair": currency_pair,
-            "side": side,  # "payment" 또는 "receipt"
+            "side": side,  # "PAYABLE" 또는 "RECEIVABLE"
             "foreign_amount": foreign_amount,
             "settlement_date": settlement_date,
             "reference_rate": reference_rate,

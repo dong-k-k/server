@@ -6,7 +6,7 @@ from app.clients.ai_service_client import AIServiceClient
 from app.risk import analytics
 
 AI_MAX_HORIZON_DAYS = 90
-SIDE_BY_DIRECTION = {"EXPORT": "receipt", "IMPORT": "payment"}
+SIDE_BY_DIRECTION = {"EXPORT": "RECEIVABLE", "IMPORT": "PAYABLE"}
 
 
 class RiskAssessmentService:
