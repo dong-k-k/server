@@ -104,7 +104,7 @@
     {% for mix in recommendation.recommendation_mix %}
     <div class="mix-row">
       <span>{{ mix.get('strategyType', '-') }}{% if mix.get('productId') %} · {{ mix.get('productId') }}{% endif %}</span>
-      <span>{{ (mix.get('allocationRatio', 0) * 100)|round(0)|int }}%</span>
+      <span>{{ ((mix.get('allocationRatio') or 0) * 100)|round(0)|int }}%</span>
     </div>
     {% endfor %}
   </section>
