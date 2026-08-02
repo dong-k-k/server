@@ -6,6 +6,12 @@ ACTION_LABELS = {
     "MEDIUM": "부분 헤지 및 환율 추이 모니터링",
     "HIGH": "즉시 헤지 실행 권장",
 }
+RISK_GRADE_LABELS = {"LOW": "낮음", "MEDIUM": "중간", "HIGH": "높음"}
+PROFILE_TYPE_LABELS = {
+    "STABILITY_FIRST": "안정 중시형",
+    "BALANCED": "균형형",
+    "COST_OPPORTUNITY_FIRST": "비용/기회 중시형",
+}
 
 MIX_ELIGIBLE_STATUSES = ("RECOMMENDED", "CONDITIONAL")
 MAX_STRATEGY_CARDS = 3
