@@ -18,26 +18,10 @@ class AIServiceClient:
         await self.client.aclose()
 
     async def get_risk_assessment(self, payload: dict) -> dict:
-        if self.mock_mode:
-            return {
-                "netExposure": 300000000,
-                "holdingDays": 45,
-                "currentRate": 1350.0,
-                "contractRate": 1330.0,
-                "esPct": 6.2,
-                "expectedMaxLoss": 6750000,
-                "bepGap": 15,
-                "bepSafetyMarginPct": 1.1,
-                "riskGrade": "HIGH",
-                "scenarioTable": [
-                    {"scenarioPct": -10, "projectedRate": 1215.0, "exportPlKrw": -13500000, "importPlKrw": 13500000, "remark": "심각한 역마진(수출)"},
-                    {"scenarioPct": 0, "projectedRate": 1350.0, "exportPlKrw": 0, "importPlKrw": 0, "remark": "현재 기준"},
-                ],
-            }
-
-        resp = await self.client.post("/internal/risk-assessment", json=payload)
-        resp.raise_for_status()
-        return resp.json()
+        async with httpx.AsyncClient(base_url=self.base_url, timeout=5) as client:
+          resp = await client.post("/internal/risk-assessment", json=payload)
+          resp.raise_for_status()
+          return resp.json()
 
     async def get_product_reason(self, payload: dict) -> dict:
         if self.mock_mode:
