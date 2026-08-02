@@ -9,8 +9,12 @@ ACTION_LABELS = {
     "PARTIAL_HEDGE_MONITOR": "부분 헤지 및 환율 추이 모니터링",
     "IMMEDIATE_HEDGE": "즉시 헤지 실행 권장",
 }
-VERDICT_LABELS = {"ELIGIBLE": "자격 충족", "CONDITIONAL": "조건부 충족", "NOT_ELIGIBLE": "자격 미충족"}
-
+ELIGIBILITY_LABELS = {
+    "RECOMMENDED": "추천",
+    "CONDITIONAL": "조건부 추천",
+    "RM_REVIEW_REQUIRED": "RM 확인 필요",
+    "NOT_RECOMMENDED": "비추천",
+}
 
 async def render_report_pdf(assessment, match_items, recommendation) -> bytes:
     template = env.get_template("report.html")
@@ -20,7 +24,7 @@ async def render_report_pdf(assessment, match_items, recommendation) -> bytes:
         recommendation=recommendation,
         risk_grade_labels=RISK_GRADE_LABELS,
         action_labels=ACTION_LABELS,
-        verdict_labels=VERDICT_LABELS,
+        eligibility_labels=ELIGIBILITY_LABELS,
     )
     async with async_playwright() as p:
         browser = await p.chromium.launch()
