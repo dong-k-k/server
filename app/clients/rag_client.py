@@ -1,3 +1,6 @@
+import httpx
+from app.core.config import settings
+
 async def call_recommend(settlement, contract, net_exposure_krw, assessment, strategy_context) -> dict:
     payload = {
         "companyProfile": {"tradeDirection": contract.contract_type, "currencies": [settlement.currency],
